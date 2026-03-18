@@ -130,13 +130,10 @@ export function ServicesSection() {
       className="py-24 md:py-36 px-6 lg:px-12 max-w-7xl mx-auto"
     >
       <div className="text-center mb-16 md:mb-24">
-        <p className="animate-fade-up font-sans text-xs tracking-[0.3em] text-stone-600 uppercase mb-4">
-          What We Offer
-        </p>
-        <h2 className="animate-fade-up delay-100 font-serif text-3xl md:text-5xl text-stone-950">
+        <h2 className="animate-fade-up font-serif text-3xl md:text-5xl text-stone-950">
           Our Services
         </h2>
-        <div className="animate-fade-up delay-200 w-12 h-px bg-stone-400 mx-auto mt-6" />
+        <div className="animate-fade-up delay-100 w-12 h-px bg-stone-400 mx-auto mt-6" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-stone-300">

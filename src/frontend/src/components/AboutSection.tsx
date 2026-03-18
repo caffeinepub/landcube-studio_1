@@ -29,23 +29,6 @@ export function AboutSection() {
               human experience.
             </p>
           </div>
-
-          <div className="mt-12 grid grid-cols-3 gap-8 border-t border-stone-400 pt-10">
-            {[
-              { value: "5+", label: "Years Experience" },
-              { value: "3", label: "Project Types" },
-              { value: "100%", label: "Sustainable Focus" },
-            ].map((stat) => (
-              <div key={stat.label}>
-                <p className="font-serif text-3xl md:text-4xl text-stone-950 mb-1">
-                  {stat.value}
-                </p>
-                <p className="font-sans text-xs tracking-[0.15em] text-stone-600 uppercase">
-                  {stat.label}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

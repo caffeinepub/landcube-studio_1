@@ -7,18 +7,31 @@ import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 export function ContactSection() {
   const sectionRef = useScrollAnimation();
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
   const [submitted, setSubmitted] = useState(false);
   const { mutate, isPending, isError } = useSubmitContact();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    mutate(form, {
-      onSuccess: () => {
-        setSubmitted(true);
-        setForm({ name: "", email: "", message: "" });
+    mutate(
+      {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        message: form.message,
       },
-    });
+      {
+        onSuccess: () => {
+          setSubmitted(true);
+          setForm({ name: "", email: "", phone: "", message: "" });
+        },
+      },
+    );
   };
 
   return (
@@ -99,6 +112,25 @@ export function ContactSection() {
                     data-ocid="contact.input"
                   />
                 </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="contact-phone"
+                  className="font-sans text-xs tracking-[0.2em] uppercase text-white/50 mb-3 block"
+                >
+                  Phone Number
+                </label>
+                <Input
+                  id="contact-phone"
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) =>
+                    setForm((p) => ({ ...p, phone: e.target.value }))
+                  }
+                  placeholder="+1 234 567 8900"
+                  className="bg-transparent border-white/20 text-white placeholder:text-white/30 focus:border-white/60 rounded-none h-12"
+                  data-ocid="contact.input"
+                />
               </div>
               <div>
                 <label
