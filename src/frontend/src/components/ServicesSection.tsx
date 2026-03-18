@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 const services = [
@@ -11,7 +12,7 @@ const services = [
         className="w-8 h-8"
         aria-hidden="true"
       >
-        <title>Residential Design</title>
+        <title>Architectural Design</title>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -19,9 +20,9 @@ const services = [
         />
       </svg>
     ),
-    title: "Residential Design",
+    title: "Architectural Design",
     description:
-      "From intimate family homes to expansive private estates, we design residences that balance beauty with function — spaces you will love to inhabit for a lifetime.",
+      "From concept to construction, we craft architecture that balances aesthetics with purpose — creating iconic structures that stand the test of time.",
   },
   {
     icon: (
@@ -33,17 +34,17 @@ const services = [
         className="w-8 h-8"
         aria-hidden="true"
       >
-        <title>Commercial Design</title>
+        <title>3D Visualization & Rendering</title>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"
+          d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
         />
       </svg>
     ),
-    title: "Commercial Design",
+    title: "3D Visualization & Rendering",
     description:
-      "Workplaces, retail environments, and hospitality spaces designed to perform. We create commercial architecture that enhances productivity, brand identity, and human experience.",
+      "Photorealistic renders and immersive visual experiences that communicate your design with clarity — supporting planning, marketing, and client approvals.",
   },
   {
     icon: (
@@ -70,7 +71,7 @@ const services = [
     ),
     title: "Interior Design",
     description:
-      "Material, light, texture, and detail — our interior design service brings architecture to life from the inside out, creating environments that are as functional as they are beautiful.",
+      "Material, light, texture, and detail — our interior design service brings architecture to life from the inside out, creating environments that are functional and beautiful.",
   },
   {
     icon: (
@@ -82,22 +83,45 @@ const services = [
         className="w-8 h-8"
         aria-hidden="true"
       >
-        <title>3D Visualisation</title>
+        <title>Concept Development</title>
         <path
           strokeLinecap="round"
           strokeLinejoin="round"
-          d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9"
+          d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"
         />
       </svg>
     ),
-    title: "3D Visualisation",
+    title: "Concept Development",
     description:
-      "Photorealistic renders, immersive walkthroughs, and virtual reality experiences that communicate your design with clarity and conviction — supporting planning, marketing, and client approvals.",
+      "We translate your vision into a compelling architectural concept — exploring ideas, narratives, and spatial strategies that guide the entire design journey.",
+  },
+  {
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.5}
+        className="w-8 h-8"
+        aria-hidden="true"
+      >
+        <title>Walkthrough Animation</title>
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z"
+        />
+      </svg>
+    ),
+    title: "Walkthrough Animation",
+    description:
+      "Cinematic animated walkthroughs that immerse clients inside the design before it is built — delivering an unmatched sense of scale, atmosphere, and spatial experience.",
   },
 ];
 
 export function ServicesSection() {
   const sectionRef = useScrollAnimation();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
     <section
@@ -115,20 +139,53 @@ export function ServicesSection() {
         <div className="animate-fade-up delay-200 w-12 h-px bg-stone-400 mx-auto mt-6" />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-stone-300">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-px bg-stone-300">
         {services.map((service, i) => (
           <div
             key={service.title}
-            className={`animate-fade-up bg-background p-10 lg:p-12 delay-${(i + 1) * 100}`}
+            onMouseEnter={() => setHoveredIndex(i)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            className={`animate-fade-up relative overflow-hidden bg-background p-10 lg:p-12 delay-${(i + 1) * 100} transition-all duration-500 ease-out cursor-default ${
+              hoveredIndex === i
+                ? "bg-stone-950 text-white"
+                : "bg-white text-stone-950"
+            }`}
           >
-            <div className="text-stone-600 mb-8">{service.icon}</div>
-            <h3 className="font-serif text-xl md:text-2xl text-stone-950 mb-4">
-              {service.title}
-            </h3>
-            <div className="w-8 h-px bg-stone-400 mb-5" />
-            <p className="font-sans text-sm text-stone-600 leading-relaxed">
-              {service.description}
-            </p>
+            {/* Animated background fill */}
+            <div
+              className={`absolute inset-0 bg-stone-950 transition-transform duration-500 ease-out origin-bottom ${
+                hoveredIndex === i ? "scale-y-100" : "scale-y-0"
+              }`}
+            />
+
+            <div className="relative z-10">
+              <div
+                className={`mb-8 transition-colors duration-500 ${
+                  hoveredIndex === i ? "text-stone-300" : "text-stone-600"
+                }`}
+              >
+                {service.icon}
+              </div>
+              <h3
+                className={`font-serif text-xl md:text-2xl mb-4 transition-colors duration-500 ${
+                  hoveredIndex === i ? "text-white" : "text-stone-950"
+                }`}
+              >
+                {service.title}
+              </h3>
+              <div
+                className={`w-8 h-px mb-5 transition-colors duration-500 ${
+                  hoveredIndex === i ? "bg-stone-500" : "bg-stone-400"
+                }`}
+              />
+              <p
+                className={`font-sans text-sm leading-relaxed transition-colors duration-500 ${
+                  hoveredIndex === i ? "text-stone-300" : "text-stone-600"
+                }`}
+              >
+                {service.description}
+              </p>
+            </div>
           </div>
         ))}
       </div>
