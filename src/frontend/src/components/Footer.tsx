@@ -25,7 +25,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3 mb-4">
               <img
-                src="/assets/uploads/WhatsApp-Image-2026-03-18-at-2.41.43-PM-1.jpeg"
+                src="/assets/uploads/WhatsApp-Image-2026-03-18-at-2.41.43-PM-1-1.jpeg"
                 alt="Landcube Design Studio"
                 className="h-12 w-12 rounded-full object-cover"
               />
