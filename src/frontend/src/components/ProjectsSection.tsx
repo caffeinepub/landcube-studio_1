@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
 export interface Project {
@@ -15,7 +16,7 @@ const projects: Project[] = [
   {
     id: 1,
     title: "Villa Serenity",
-    category: "Residential",
+    category: "Villas",
     year: "2024",
     image: "/assets/generated/project1.dim_800x600.jpg",
     concept:
@@ -30,14 +31,14 @@ const projects: Project[] = [
   },
   {
     id: 2,
-    title: "The Glass Tower",
-    category: "Commercial",
+    title: "The Horizon Residence",
+    category: "Residential buildings",
     year: "2023",
     image: "/assets/generated/project2.dim_800x600.jpg",
     concept:
-      "The Glass Tower redefines the corporate workplace as a beacon of transparency and ambition. Its high-performance curtain wall system maximises natural light penetration while optimising thermal performance. The tower's tapered form reduces wind load while creating a distinctive silhouette on the urban skyline — a landmark that communicates the client's forward-thinking values.",
+      "The Horizon Residence redefines modern living with a bold interplay of form and function. Its façade celebrates transparency and ambition, maximising natural light while optimising thermal performance. The building's refined form creates a distinctive presence — a landmark that communicates the client's forward-thinking values.",
     process:
-      "The design process involved extensive parametric modelling to optimise facade geometry for both structural efficiency and solar control. Wind tunnel testing informed the final tower profile. Collaboration with sustainability engineers delivered a LEED Platinum-targeted building with rainwater harvesting, photovoltaic cladding panels, and a rooftop garden accessible to all occupants.",
+      "The design process involved extensive parametric modelling to optimise facade geometry for both structural efficiency and solar control. Collaboration with sustainability engineers delivered a high-performance building with rainwater harvesting and a rooftop garden accessible to all occupants.",
     gallery: [
       "/assets/generated/project2.dim_800x600.jpg",
       "/assets/generated/project1.dim_800x600.jpg",
@@ -47,13 +48,13 @@ const projects: Project[] = [
   {
     id: 3,
     title: "Urban Sanctuary",
-    category: "Interior Design",
+    category: "Interior",
     year: "2024",
     image: "/assets/generated/project3.dim_800x600.jpg",
     concept:
-      "Urban Sanctuary transforms a high-rise penthouse into a haven of calm within the city's energy. The interior language draws from Japanese wabi-sabi philosophy — celebrating imperfection, natural materials, and meditative space. Travertine floors, hand-plastered walls, and bespoke furniture in natural linen create an environment that quiets the mind and restores the spirit.",
+      "Urban Sanctuary transforms a high-rise penthouse into a haven of calm within the city's energy. The interior language draws from Japanese wabi-sabi philosophy — celebrating imperfection, natural materials, and meditative space.",
     process:
-      "Extensive material sourcing expeditions informed a palette of artisanal materials — quarried travertine from Turkey, hand-blown glass from Murano, solid oak joinery from sustainable forests. Space planning prioritised views and natural light. Custom millwork drawings were developed in close collaboration with craftspeople, ensuring every built-in element met the exacting quality standards of the project.",
+      "Extensive material sourcing expeditions informed a palette of artisanal materials — quarried travertine, hand-blown glass, and solid oak joinery from sustainable forests. Custom millwork drawings were developed in close collaboration with craftspeople.",
     gallery: [
       "/assets/generated/project3.dim_800x600.jpg",
       "/assets/generated/project1.dim_800x600.jpg",
@@ -63,13 +64,13 @@ const projects: Project[] = [
   {
     id: 4,
     title: "Cultural Nexus",
-    category: "3D Visualization",
+    category: "Public",
     year: "2023",
     image: "/assets/generated/project4.dim_800x600.jpg",
     concept:
-      "Cultural Nexus is an immersive visualisation project for a proposed civic arts centre at the heart of a regenerating urban district. The design proposes a building that acts as a connector — between neighbourhoods, between disciplines, between tradition and innovation. Its parametric facade is inspired by traditional geometric patterns, reinterpreted through computational design.",
+      "Cultural Nexus is a civic arts centre at the heart of a regenerating urban district. The design proposes a building that acts as a connector — between neighbourhoods, between disciplines, between tradition and innovation.",
     process:
-      "The visualisation was produced using a combination of Rhino/Grasshopper for form generation, V-Ray for photorealistic rendering, and Unreal Engine for real-time walkthroughs. Extensive post-processing in Photoshop and After Effects ensured each frame communicated the design intent with cinematic quality, supporting the client's planning application and stakeholder engagement campaign.",
+      "The design involved extensive parametric modelling, wind analysis, and sustainability planning. Its parametric facade is inspired by traditional geometric patterns, reinterpreted through computational design, supporting the community's planning and stakeholder engagement.",
     gallery: [
       "/assets/generated/project4.dim_800x600.jpg",
       "/assets/generated/project2.dim_800x600.jpg",
@@ -78,12 +79,26 @@ const projects: Project[] = [
   },
 ];
 
+const categories = [
+  "All",
+  "Residential buildings",
+  "Interior",
+  "Public",
+  "Villas",
+];
+
 interface ProjectsSectionProps {
   onProjectSelect: (project: Project) => void;
 }
 
 export function ProjectsSection({ onProjectSelect }: ProjectsSectionProps) {
   const sectionRef = useScrollAnimation();
+  const [activeCategory, setActiveCategory] = useState("All");
+
+  const filtered =
+    activeCategory === "All"
+      ? projects
+      : projects.filter((p) => p.category === activeCategory);
 
   return (
     <section
@@ -91,18 +106,36 @@ export function ProjectsSection({ onProjectSelect }: ProjectsSectionProps) {
       ref={sectionRef as React.RefObject<HTMLElement>}
       className="py-24 md:py-36 px-6 lg:px-12 max-w-7xl mx-auto"
     >
-      <div className="text-center mb-16 md:mb-24">
+      <div className="text-center mb-12 md:mb-20">
         <p className="animate-fade-up font-sans text-xs tracking-[0.3em] text-stone-700 uppercase mb-4">
           Selected Work
         </p>
         <h2 className="animate-fade-up delay-100 font-serif text-3xl md:text-5xl text-stone-950">
-          Portfolio
+          Projects
         </h2>
         <div className="animate-fade-up delay-200 w-12 h-px bg-stone-400 mx-auto mt-6" />
       </div>
 
+      {/* Category Filter */}
+      <div className="flex flex-wrap justify-center gap-2 mb-12">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => setActiveCategory(cat)}
+            className={`px-5 py-2 text-xs tracking-[0.2em] uppercase font-sans transition-all duration-300 border ${
+              activeCategory === cat
+                ? "bg-stone-950 text-white border-stone-950"
+                : "bg-transparent text-stone-600 border-stone-300 hover:border-stone-600 hover:text-stone-900"
+            }`}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-stone-300">
-        {projects.map((project, i) => (
+        {filtered.map((project, i) => (
           <button
             type="button"
             key={project.id}
