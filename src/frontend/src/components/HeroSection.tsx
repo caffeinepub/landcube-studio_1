@@ -46,9 +46,7 @@ export function HeroSection() {
           Architecture & Design Studio
         </p>
         <h1 className="hero-headline font-serif text-4xl md:text-6xl lg:text-7xl leading-tight mb-8">
-          Designing Spaces
-          <br />
-          <em>That Inspire.</em>
+          Landcube Studio
         </h1>
         <div className="hero-cta">
           <button
