@@ -4,7 +4,6 @@ import { createActorWithConfig } from "../config";
 import { useActor } from "./useActor";
 
 export function useSubmitContact() {
-  const { actor } = useActor();
   return useMutation({
     mutationFn: async ({
       name,
@@ -17,9 +16,9 @@ export function useSubmitContact() {
       phone: string;
       message: string;
     }) => {
-      // Use existing actor or create an anonymous one on-demand
-      const resolvedActor = actor ?? (await createActorWithConfig());
-      await resolvedActor.submitForm(name, email, phone, message);
+      // Always create a fresh anonymous actor for public submitForm — no auth needed
+      const actor = await createActorWithConfig();
+      await actor.submitForm(name, email, phone, message);
     },
   });
 }
