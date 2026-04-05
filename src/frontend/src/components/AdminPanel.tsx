@@ -9,13 +9,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
@@ -37,7 +30,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 import type { Project } from "../backend";
@@ -62,10 +55,8 @@ interface ProjectFormData {
   year: string;
   concept: string;
   process: string;
-  coverImageFile: File | null;
-  galleryImageFiles: File[];
-  existingCoverImageId: string;
-  existingGalleryImageIds: string[];
+  imageFile: File | null;
+  existingImageId: string;
 }
 
 const emptyForm = (): ProjectFormData => ({
@@ -74,20 +65,17 @@ const emptyForm = (): ProjectFormData => ({
   year: new Date().getFullYear().toString(),
   concept: "",
   process: "",
-  coverImageFile: null,
-  galleryImageFiles: [],
-  existingCoverImageId: "",
-  existingGalleryImageIds: [],
+  imageFile: null,
+  existingImageId: "",
 });
 
-function ProjectFormDialog({
-  open,
-  onOpenChange,
+// Inline form panel — renders inside the admin panel's z-[100] container
+function ProjectFormPanel({
   editingProject,
+  onClose,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   editingProject: Project | null;
+  onClose: () => void;
 }) {
   const [form, setForm] = useState<ProjectFormData>(() =>
     editingProject
@@ -97,44 +85,19 @@ function ProjectFormDialog({
           year: editingProject.year,
           concept: editingProject.concept,
           process: editingProject.process,
-          coverImageFile: null,
-          galleryImageFiles: [],
-          existingCoverImageId: editingProject.coverImageId,
-          existingGalleryImageIds: editingProject.galleryImageIds,
+          imageFile: null,
+          existingImageId: editingProject.coverImageId,
         }
       : emptyForm(),
   );
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { uploadFile } = useStorageUpload();
   const createProject = useCreateProject();
   const updateProject = useUpdateProject();
-
-  const handleOpenChange = (val: boolean) => {
-    if (!val) {
-      setForm(
-        editingProject
-          ? {
-              title: editingProject.title,
-              category: editingProject.category,
-              year: editingProject.year,
-              concept: editingProject.concept,
-              process: editingProject.process,
-              coverImageFile: null,
-              galleryImageFiles: [],
-              existingCoverImageId: editingProject.coverImageId,
-              existingGalleryImageIds: editingProject.galleryImageIds,
-            }
-          : emptyForm(),
-      );
-      setUploadProgress(0);
-    }
-    onOpenChange(val);
-  };
 
   const handleSubmit = async () => {
     if (!form.title.trim()) {
@@ -146,9 +109,9 @@ function ProjectFormDialog({
       return;
     }
 
-    const needsCover = !form.existingCoverImageId && !form.coverImageFile;
-    if (needsCover) {
-      toast.error("Cover image is required");
+    const needsImage = !form.existingImageId && !form.imageFile;
+    if (needsImage) {
+      toast.error("Project image is required");
       return;
     }
 
@@ -156,27 +119,12 @@ function ProjectFormDialog({
     setUploadProgress(0);
 
     try {
-      let coverImageId = form.existingCoverImageId;
-      if (form.coverImageFile) {
+      let imageId = form.existingImageId;
+      if (form.imageFile) {
         setUploadProgress(5);
-        coverImageId = await uploadFile(form.coverImageFile, (pct) => {
-          setUploadProgress(Math.round(pct * 0.5));
+        imageId = await uploadFile(form.imageFile, (pct) => {
+          setUploadProgress(Math.round(pct * 90));
         });
-      }
-
-      let galleryImageIds = [...form.existingGalleryImageIds];
-      if (form.galleryImageFiles.length > 0) {
-        const newGalleryUrls: string[] = [];
-        for (let i = 0; i < form.galleryImageFiles.length; i++) {
-          const url = await uploadFile(form.galleryImageFiles[i], (pct) => {
-            const base = 50 + (i / form.galleryImageFiles.length) * 45;
-            setUploadProgress(
-              Math.round(base + (pct * 45) / form.galleryImageFiles.length),
-            );
-          });
-          newGalleryUrls.push(url);
-        }
-        galleryImageIds = [...galleryImageIds, ...newGalleryUrls];
       }
 
       setUploadProgress(95);
@@ -189,8 +137,8 @@ function ProjectFormDialog({
           year: form.year,
           concept: form.concept,
           process: form.process,
-          coverImageId,
-          galleryImageIds,
+          coverImageId: imageId,
+          galleryImageIds: editingProject.galleryImageIds,
         });
         toast.success("Project updated");
       } else {
@@ -200,14 +148,14 @@ function ProjectFormDialog({
           year: form.year,
           concept: form.concept,
           process: form.process,
-          coverImageId,
-          galleryImageIds,
+          coverImageId: imageId,
+          galleryImageIds: [],
         });
         toast.success("Project created");
       }
 
       setUploadProgress(100);
-      handleOpenChange(false);
+      onClose();
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to save project",
@@ -218,266 +166,234 @@ function ProjectFormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent
-        className="bg-white border-stone-200 text-stone-900 max-w-2xl max-h-[90vh] overflow-y-auto"
-        data-ocid="admin.project.dialog"
-      >
-        <DialogHeader className="border-b border-stone-200 pb-4">
-          <DialogTitle className="font-serif text-xl text-stone-900">
+    <div
+      className="absolute inset-0 z-10 bg-stone-950 flex flex-col"
+      data-ocid="admin.project.dialog"
+    >
+      {/* Form Header */}
+      <div className="flex items-center gap-4 px-8 py-6 border-b border-white/20 flex-shrink-0">
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={isSubmitting}
+          className="text-white/60 hover:text-white transition-colors p-1 -ml-1"
+          aria-label="Back to projects"
+          data-ocid="admin.project.cancel_button"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <div>
+          <p className="font-sans text-xs tracking-[0.3em] uppercase text-white/50">
+            Admin
+          </p>
+          <h2 className="font-serif text-xl text-white tracking-wide">
             {editingProject ? "Edit Project" : "Add Project"}
-          </DialogTitle>
-        </DialogHeader>
+          </h2>
+        </div>
+      </div>
 
-        <div className="space-y-5 py-2">
-          {/* Title */}
-          <div className="space-y-1.5">
-            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-              Title *
-            </Label>
-            <Input
-              value={form.title}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, title: e.target.value }))
-              }
-              placeholder="Project title"
-              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0"
-              data-ocid="admin.project.input"
-            />
-          </div>
-
-          {/* Category + Year row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-                Category *
-              </Label>
-              <Select
-                value={form.category}
-                onValueChange={(val) =>
-                  setForm((f) => ({ ...f, category: val }))
-                }
-              >
-                <SelectTrigger
-                  className="bg-white border-stone-300 text-stone-900 focus:ring-0 focus:border-stone-500"
-                  data-ocid="admin.project.select"
-                >
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-stone-200">
-                  {CATEGORIES.map((cat) => (
-                    <SelectItem
-                      key={cat}
-                      value={cat}
-                      className="text-stone-900 focus:bg-stone-100 focus:text-stone-900 cursor-pointer"
-                    >
-                      {cat}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-                Year
+      {/* Form Body */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-8 py-8">
+          {/* White form card */}
+          <div className="bg-white rounded-lg p-8 space-y-6 shadow-xl">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                Title *
               </Label>
               <Input
-                value={form.year}
+                value={form.title}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, year: e.target.value }))
+                  setForm((f) => ({ ...f, title: e.target.value }))
                 }
-                placeholder="2024"
-                className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0"
+                placeholder="Project title"
+                className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-600 focus-visible:ring-1 focus-visible:ring-stone-400"
+                data-ocid="admin.project.input"
               />
             </div>
-          </div>
 
-          {/* Cover Image */}
-          <div className="space-y-1.5">
-            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-              Cover Image {!editingProject && "*"}
-            </Label>
-            {form.existingCoverImageId && !form.coverImageFile && (
-              <div className="relative w-24 h-16 rounded overflow-hidden mb-2">
-                <img
-                  src={form.existingCoverImageId}
-                  alt="Current cover"
-                  className="w-full h-full object-cover"
+            {/* Category + Year */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                  Category *
+                </Label>
+                <Select
+                  value={form.category}
+                  onValueChange={(val) =>
+                    setForm((f) => ({ ...f, category: val }))
+                  }
+                >
+                  <SelectTrigger
+                    className="bg-white border-stone-300 text-stone-900 focus:ring-1 focus:ring-stone-400 focus:border-stone-600"
+                    data-ocid="admin.project.select"
+                  >
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-stone-200 z-[300]">
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem
+                        key={cat}
+                        value={cat}
+                        className="text-stone-900 focus:bg-stone-100 focus:text-stone-900 cursor-pointer"
+                      >
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                  Year
+                </Label>
+                <Input
+                  value={form.year}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, year: e.target.value }))
+                  }
+                  placeholder="2024"
+                  className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-600 focus-visible:ring-1 focus-visible:ring-stone-400"
                 />
-                <p className="text-stone-500 text-xs mt-1">
-                  Current cover (upload to replace)
-                </p>
               </div>
-            )}
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0] ?? null;
-                setForm((f) => ({ ...f, coverImageFile: file }));
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => coverInputRef.current?.click()}
-              className="border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-400"
-              data-ocid="admin.project.upload_button"
-            >
-              {form.coverImageFile
-                ? form.coverImageFile.name
-                : "Choose cover image"}
-            </Button>
-          </div>
+            </div>
 
-          {/* Gallery Images */}
-          <div className="space-y-1.5">
-            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-              Gallery Images
-            </Label>
-            {form.existingGalleryImageIds.length > 0 && (
-              <div className="flex gap-2 flex-wrap mb-2">
-                {form.existingGalleryImageIds.map((url, i) => (
-                  <div key={url} className="relative">
-                    <img
-                      src={url}
-                      alt={`Gallery ${i + 1}`}
-                      className="w-16 h-12 object-cover rounded"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm((f) => ({
-                          ...f,
-                          existingGalleryImageIds:
-                            f.existingGalleryImageIds.filter((_, j) => j !== i),
-                        }))
-                      }
-                      className="absolute -top-1 -right-1 bg-red-600 rounded-full w-4 h-4 flex items-center justify-center"
-                    >
-                      <X size={10} className="text-white" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <input
-              ref={galleryInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                const files = Array.from(e.target.files ?? []);
-                setForm((f) => ({
-                  ...f,
-                  galleryImageFiles: [...f.galleryImageFiles, ...files],
-                }));
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => galleryInputRef.current?.click()}
-              className="border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-400"
-              data-ocid="admin.project.upload_button"
-            >
-              Add gallery images
-            </Button>
-            {form.galleryImageFiles.length > 0 && (
-              <p className="text-stone-500 text-xs">
-                {form.galleryImageFiles.length} new file(s) selected
-              </p>
-            )}
-          </div>
+            {/* Project Image */}
+            <div className="space-y-2">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                Project Image {!editingProject && "*"}
+              </Label>
+              {form.existingImageId && !form.imageFile && (
+                <div className="mb-3">
+                  <img
+                    src={form.existingImageId}
+                    alt="Current project"
+                    className="w-24 h-16 object-cover rounded border border-stone-200"
+                  />
+                  <p className="text-stone-500 text-xs mt-1">
+                    Current image — upload to replace
+                  </p>
+                </div>
+              )}
+              {form.imageFile && (
+                <div className="mb-3">
+                  <img
+                    src={URL.createObjectURL(form.imageFile)}
+                    alt="Selected project"
+                    className="w-24 h-16 object-cover rounded border border-stone-200"
+                  />
+                </div>
+              )}
+              <input
+                ref={imageInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] ?? null;
+                  setForm((f) => ({ ...f, imageFile: file }));
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 border border-stone-300 rounded bg-stone-50 text-stone-700 text-sm font-medium hover:bg-stone-100 hover:border-stone-400 transition-colors"
+                data-ocid="admin.project.upload_button"
+              >
+                {form.imageFile ? form.imageFile.name : "Choose image"}
+              </button>
+            </div>
 
-          {/* Concept */}
-          <div className="space-y-1.5">
-            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-              Concept
-            </Label>
-            <Textarea
-              value={form.concept}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, concept: e.target.value }))
-              }
-              placeholder="Describe the design concept..."
-              rows={4}
-              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0 resize-none"
-              data-ocid="admin.project.textarea"
-            />
-          </div>
-
-          {/* Process */}
-          <div className="space-y-1.5">
-            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
-              Process
-            </Label>
-            <Textarea
-              value={form.process}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, process: e.target.value }))
-              }
-              placeholder="Describe the design process..."
-              rows={4}
-              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0 resize-none"
-            />
-          </div>
-
-          {/* Upload progress */}
-          {isSubmitting && (
-            <div className="space-y-2" data-ocid="admin.project.loading_state">
-              <div className="flex items-center justify-between">
-                <p className="text-stone-600 text-xs tracking-widest uppercase">
-                  Uploading...
-                </p>
-                <p className="text-stone-600 text-xs">{uploadProgress}%</p>
-              </div>
-              <Progress
-                value={uploadProgress}
-                className="h-1 bg-stone-200 [&>div]:bg-stone-800"
+            {/* Concept */}
+            <div className="space-y-2">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                Concept
+              </Label>
+              <Textarea
+                value={form.concept}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, concept: e.target.value }))
+                }
+                placeholder="Describe the design concept..."
+                rows={4}
+                className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-600 focus-visible:ring-1 focus-visible:ring-stone-400 resize-none"
+                data-ocid="admin.project.textarea"
               />
             </div>
-          )}
-        </div>
 
-        <DialogFooter className="gap-3 border-t border-stone-200 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => handleOpenChange(false)}
-            disabled={isSubmitting}
-            className="text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-stone-300"
-            data-ocid="admin.project.cancel_button"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-stone-900 text-white hover:bg-stone-800 font-semibold"
-            data-ocid="admin.project.submit_button"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Saving...
-              </>
-            ) : editingProject ? (
-              "Save Changes"
-            ) : (
-              "Create Project"
+            {/* Process */}
+            <div className="space-y-2">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-semibold">
+                Process
+              </Label>
+              <Textarea
+                value={form.process}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, process: e.target.value }))
+                }
+                placeholder="Describe the design process..."
+                rows={4}
+                className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-600 focus-visible:ring-1 focus-visible:ring-stone-400 resize-none"
+              />
+            </div>
+
+            {/* Upload progress */}
+            {isSubmitting && (
+              <div
+                className="space-y-2 pt-2"
+                data-ocid="admin.project.loading_state"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-stone-600 text-xs tracking-widest uppercase">
+                    Uploading...
+                  </p>
+                  <p className="text-stone-600 text-xs font-medium">
+                    {uploadProgress}%
+                  </p>
+                </div>
+                <Progress
+                  value={uploadProgress}
+                  className="h-1.5 bg-stone-200 [&>div]:bg-stone-800"
+                />
+              </div>
             )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+
+            {/* Action buttons */}
+            <div className="flex gap-3 pt-2 border-t border-stone-100">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isSubmitting}
+                className="flex-1 px-5 py-2.5 border border-stone-300 rounded text-stone-600 text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors disabled:opacity-50"
+                data-ocid="admin.project.cancel_button"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="flex-1 px-5 py-2.5 bg-stone-900 text-white rounded text-sm font-semibold hover:bg-stone-800 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+                data-ocid="admin.project.submit_button"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : editingProject ? (
+                  "Save Changes"
+                ) : (
+                  "Create Project"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -490,18 +406,23 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
   const { data: projects, isLoading: projectsLoading } = useGetAllProjects();
   const deleteProject = useDeleteProject();
 
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<bigint | null>(null);
 
   const handleAddProject = () => {
     setEditingProject(null);
-    setDialogOpen(true);
+    setShowForm(true);
   };
 
   const handleEditProject = (project: Project) => {
     setEditingProject(project);
-    setDialogOpen(true);
+    setShowForm(true);
+  };
+
+  const handleFormClose = () => {
+    setShowForm(false);
+    setEditingProject(null);
   };
 
   const handleDeleteConfirm = async () => {
@@ -522,7 +443,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       data-ocid="admin.panel"
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-8 py-6 border-b border-white/20">
+      <header className="flex items-center justify-between px-8 py-6 border-b border-white/20 flex-shrink-0">
         <div>
           <p className="font-sans text-xs tracking-[0.3em] uppercase text-white/50 mb-1">
             Admin
@@ -543,7 +464,7 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
       </header>
 
       {/* Tabs */}
-      <div className="flex-1 overflow-hidden px-4 md:px-8 py-6">
+      <div className="flex-1 overflow-hidden px-4 md:px-8 py-6 relative">
         <Tabs defaultValue="projects" className="h-full flex flex-col">
           <TabsList
             className="bg-white/10 border border-white/20 mb-6 w-fit"
@@ -768,25 +689,24 @@ export function AdminPanel({ onClose }: AdminPanelProps) {
               )}
           </TabsContent>
         </Tabs>
+
+        {/* Inline form panel — covers the tabs area, same z-context as admin panel */}
+        {showForm && (
+          <ProjectFormPanel
+            editingProject={editingProject}
+            onClose={handleFormClose}
+          />
+        )}
       </div>
 
-      {/* Project form dialog */}
-      <ProjectFormDialog
-        open={dialogOpen}
-        onOpenChange={(val) => {
-          setDialogOpen(val);
-          if (!val) setEditingProject(null);
-        }}
-        editingProject={editingProject}
-      />
-
-      {/* Delete confirmation dialog */}
+      {/* Delete confirmation — z-[200] so it appears above admin panel */}
       <AlertDialog
         open={deleteTargetId !== null}
         onOpenChange={(open) => !open && setDeleteTargetId(null)}
       >
         <AlertDialogContent
-          className="bg-stone-900 border-white/20 text-white"
+          className="bg-stone-900 border-white/20 text-white z-[200]"
+          style={{ zIndex: 200 }}
           data-ocid="admin.project.dialog"
         >
           <AlertDialogHeader>
