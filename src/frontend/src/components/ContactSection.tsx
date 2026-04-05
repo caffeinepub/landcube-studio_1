@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
+import { useActor } from "../hooks/useActor";
 import { useSubmitContact } from "../hooks/useQueries";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
@@ -15,6 +16,8 @@ export function ContactSection() {
   });
   const [submitted, setSubmitted] = useState(false);
   const { mutate, isPending, isError } = useSubmitContact();
+  const { actor, isFetching: isActorFetching } = useActor();
+  const isActorReady = !!actor && !isActorFetching;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +91,7 @@ export function ContactSection() {
                       setForm((p) => ({ ...p, name: e.target.value }))
                     }
                     placeholder="Your full name"
-                    className="bg-transparent border-white/20 text-white placeholder:text-white/30 focus:border-white/60 rounded-none h-12"
+                    className="bg-white/10 border-white/20 hover:border-white/40 text-white placeholder:text-white/40 focus:border-white/60 rounded-none h-12"
                     data-ocid="contact.input"
                   />
                 </div>
@@ -108,7 +111,7 @@ export function ContactSection() {
                       setForm((p) => ({ ...p, email: e.target.value }))
                     }
                     placeholder="your@email.com"
-                    className="bg-transparent border-white/20 text-white placeholder:text-white/30 focus:border-white/60 rounded-none h-12"
+                    className="bg-white/10 border-white/20 hover:border-white/40 text-white placeholder:text-white/40 focus:border-white/60 rounded-none h-12"
                     data-ocid="contact.input"
                   />
                 </div>
@@ -128,7 +131,7 @@ export function ContactSection() {
                     setForm((p) => ({ ...p, phone: e.target.value }))
                   }
                   placeholder="+1 234 567 8900"
-                  className="bg-transparent border-white/20 text-white placeholder:text-white/30 focus:border-white/60 rounded-none h-12"
+                  className="bg-white/10 border-white/20 hover:border-white/40 text-white placeholder:text-white/40 focus:border-white/60 rounded-none h-12"
                   data-ocid="contact.input"
                 />
               </div>
@@ -148,7 +151,7 @@ export function ContactSection() {
                   }
                   placeholder="Tell us about your project..."
                   rows={6}
-                  className="bg-transparent border-white/20 text-white placeholder:text-white/30 focus:border-white/60 rounded-none resize-none"
+                  className="bg-white/10 border-white/20 hover:border-white/40 text-white placeholder:text-white/40 focus:border-white/60 rounded-none resize-none"
                   data-ocid="contact.textarea"
                 />
               </div>
@@ -158,13 +161,13 @@ export function ContactSection() {
                   className="font-sans text-sm text-red-400"
                   data-ocid="contact.error_state"
                 >
-                  Something went wrong. Please try again.
+                  Unable to send message. Please try again in a moment.
                 </p>
               )}
 
               <button
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || !isActorReady}
                 className="w-full bg-white text-stone-950 font-sans text-xs tracking-[0.25em] uppercase py-4 hover:bg-stone-200 transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-60"
                 data-ocid="contact.submit_button"
               >
@@ -172,6 +175,11 @@ export function ContactSection() {
                   <>
                     <Loader2 size={16} className="animate-spin" />
                     Sending...
+                  </>
+                ) : !isActorReady ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Connecting...
                   </>
                 ) : (
                   "Start a Project"
