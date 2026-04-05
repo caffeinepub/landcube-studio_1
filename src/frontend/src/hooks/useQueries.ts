@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Project } from "../backend";
+import { createActorWithConfig } from "../config";
 import { useActor } from "./useActor";
 
 export function useSubmitContact() {
@@ -16,8 +17,9 @@ export function useSubmitContact() {
       phone: string;
       message: string;
     }) => {
-      if (!actor) throw new Error("Not connected");
-      await actor.submitForm(name, email, phone, message);
+      // Use existing actor or create an anonymous one on-demand
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      await resolvedActor.submitForm(name, email, phone, message);
     },
   });
 }

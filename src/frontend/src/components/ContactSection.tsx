@@ -2,7 +2,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { useActor } from "../hooks/useActor";
 import { useSubmitContact } from "../hooks/useQueries";
 import { useScrollAnimation } from "../hooks/useScrollAnimation";
 
@@ -16,8 +15,6 @@ export function ContactSection() {
   });
   const [submitted, setSubmitted] = useState(false);
   const { mutate, isPending, isError } = useSubmitContact();
-  const { actor, isFetching: isActorFetching } = useActor();
-  const isActorReady = !!actor && !isActorFetching;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,7 +164,7 @@ export function ContactSection() {
 
               <button
                 type="submit"
-                disabled={isPending || !isActorReady}
+                disabled={isPending}
                 className="w-full bg-white text-stone-950 font-sans text-xs tracking-[0.25em] uppercase py-4 hover:bg-stone-200 transition-colors duration-300 flex items-center justify-center gap-2 disabled:opacity-60"
                 data-ocid="contact.submit_button"
               >
@@ -175,11 +172,6 @@ export function ContactSection() {
                   <>
                     <Loader2 size={16} className="animate-spin" />
                     Sending...
-                  </>
-                ) : !isActorReady ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Connecting...
                   </>
                 ) : (
                   "Start a Project"
