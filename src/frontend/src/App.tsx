@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/sonner";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { AboutSection } from "./components/AboutSection";
 import { AdminPanel } from "./components/AdminPanel";
@@ -12,9 +11,6 @@ import { ProjectsSection } from "./components/ProjectsSection";
 import type { Project } from "./components/ProjectsSection";
 import { ServicesSection } from "./components/ServicesSection";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
-import { useIsAdmin } from "./hooks/useQueries";
-
-const queryClient = new QueryClient();
 
 function AppInner() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -22,10 +18,9 @@ function AppInner() {
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity;
-  const { data: isAdmin } = useIsAdmin();
 
   const handleAdminDashboard = () => {
-    if (isAuthenticated && isAdmin) {
+    if (isAuthenticated) {
       setAdminPanelOpen(true);
     }
   };
@@ -52,7 +47,7 @@ function AppInner() {
         />
       )}
 
-      {adminPanelOpen && isAdmin && (
+      {adminPanelOpen && (
         <AdminPanel onClose={() => setAdminPanelOpen(false)} />
       )}
     </div>
@@ -60,9 +55,5 @@ function AppInner() {
 }
 
 export default function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <AppInner />
-    </QueryClientProvider>
-  );
+  return <AppInner />;
 }

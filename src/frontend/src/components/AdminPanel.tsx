@@ -220,11 +220,11 @@ function ProjectFormDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
-        className="bg-stone-900 border-white/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white border-stone-200 text-stone-900 max-w-2xl max-h-[90vh] overflow-y-auto"
         data-ocid="admin.project.dialog"
       >
-        <DialogHeader className="border-b border-white/20 pb-4">
-          <DialogTitle className="font-serif text-xl text-white">
+        <DialogHeader className="border-b border-stone-200 pb-4">
+          <DialogTitle className="font-serif text-xl text-stone-900">
             {editingProject ? "Edit Project" : "Add Project"}
           </DialogTitle>
         </DialogHeader>
@@ -232,7 +232,7 @@ function ProjectFormDialog({
         <div className="space-y-5 py-2">
           {/* Title */}
           <div className="space-y-1.5">
-            <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
               Title *
             </Label>
             <Input
@@ -241,7 +241,7 @@ function ProjectFormDialog({
                 setForm((f) => ({ ...f, title: e.target.value }))
               }
               placeholder="Project title"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus-visible:ring-0"
+              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0"
               data-ocid="admin.project.input"
             />
           </div>
@@ -249,7 +249,7 @@ function ProjectFormDialog({
           {/* Category + Year row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
                 Category *
               </Label>
               <Select
@@ -259,17 +259,17 @@ function ProjectFormDialog({
                 }
               >
                 <SelectTrigger
-                  className="bg-white/10 border-white/20 text-white focus:ring-0 focus:border-white/50"
+                  className="bg-white border-stone-300 text-stone-900 focus:ring-0 focus:border-stone-500"
                   data-ocid="admin.project.select"
                 >
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-stone-900 border-white/20">
+                <SelectContent className="bg-white border-stone-200">
                   {CATEGORIES.map((cat) => (
                     <SelectItem
                       key={cat}
                       value={cat}
-                      className="text-white focus:bg-white/10 focus:text-white cursor-pointer"
+                      className="text-stone-900 focus:bg-stone-100 focus:text-stone-900 cursor-pointer"
                     >
                       {cat}
                     </SelectItem>
@@ -279,7 +279,7 @@ function ProjectFormDialog({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+              <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
                 Year
               </Label>
               <Input
@@ -288,14 +288,14 @@ function ProjectFormDialog({
                   setForm((f) => ({ ...f, year: e.target.value }))
                 }
                 placeholder="2024"
-                className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus-visible:ring-0"
+                className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0"
               />
             </div>
           </div>
 
           {/* Cover Image */}
           <div className="space-y-1.5">
-            <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
               Cover Image {!editingProject && "*"}
             </Label>
             {form.existingCoverImageId && !form.coverImageFile && (
@@ -305,7 +305,7 @@ function ProjectFormDialog({
                   alt="Current cover"
                   className="w-full h-full object-cover"
                 />
-                <p className="text-white/50 text-xs mt-1">
+                <p className="text-stone-500 text-xs mt-1">
                   Current cover (upload to replace)
                 </p>
               </div>
@@ -325,7 +325,7 @@ function ProjectFormDialog({
               variant="outline"
               size="sm"
               onClick={() => coverInputRef.current?.click()}
-              className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white hover:border-white/50"
+              className="border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-400"
               data-ocid="admin.project.upload_button"
             >
               {form.coverImageFile
@@ -336,7 +336,7 @@ function ProjectFormDialog({
 
           {/* Gallery Images */}
           <div className="space-y-1.5">
-            <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
               Gallery Images
             </Label>
             {form.existingGalleryImageIds.length > 0 && (
@@ -384,13 +384,13 @@ function ProjectFormDialog({
               variant="outline"
               size="sm"
               onClick={() => galleryInputRef.current?.click()}
-              className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white hover:border-white/50"
+              className="border-stone-300 bg-stone-50 text-stone-700 hover:bg-stone-100 hover:text-stone-900 hover:border-stone-400"
               data-ocid="admin.project.upload_button"
             >
               Add gallery images
             </Button>
             {form.galleryImageFiles.length > 0 && (
-              <p className="text-white/50 text-xs">
+              <p className="text-stone-500 text-xs">
                 {form.galleryImageFiles.length} new file(s) selected
               </p>
             )}
@@ -398,7 +398,7 @@ function ProjectFormDialog({
 
           {/* Concept */}
           <div className="space-y-1.5">
-            <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
               Concept
             </Label>
             <Textarea
@@ -408,14 +408,14 @@ function ProjectFormDialog({
               }
               placeholder="Describe the design concept..."
               rows={4}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus-visible:ring-0 resize-none"
+              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0 resize-none"
               data-ocid="admin.project.textarea"
             />
           </div>
 
           {/* Process */}
           <div className="space-y-1.5">
-            <Label className="text-white/80 text-xs tracking-widest uppercase font-medium">
+            <Label className="text-stone-700 text-xs tracking-widest uppercase font-medium">
               Process
             </Label>
             <Textarea
@@ -425,7 +425,7 @@ function ProjectFormDialog({
               }
               placeholder="Describe the design process..."
               rows={4}
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-white/50 focus-visible:ring-0 resize-none"
+              className="bg-white border-stone-300 text-stone-900 placeholder:text-stone-400 focus:border-stone-500 focus-visible:ring-0 resize-none"
             />
           </div>
 
@@ -433,26 +433,26 @@ function ProjectFormDialog({
           {isSubmitting && (
             <div className="space-y-2" data-ocid="admin.project.loading_state">
               <div className="flex items-center justify-between">
-                <p className="text-white/70 text-xs tracking-widest uppercase">
+                <p className="text-stone-600 text-xs tracking-widest uppercase">
                   Uploading...
                 </p>
-                <p className="text-white/70 text-xs">{uploadProgress}%</p>
+                <p className="text-stone-600 text-xs">{uploadProgress}%</p>
               </div>
               <Progress
                 value={uploadProgress}
-                className="h-1 bg-white/20 [&>div]:bg-white"
+                className="h-1 bg-stone-200 [&>div]:bg-stone-800"
               />
             </div>
           )}
         </div>
 
-        <DialogFooter className="gap-3 border-t border-white/20 pt-4">
+        <DialogFooter className="gap-3 border-t border-stone-200 pt-4">
           <Button
             type="button"
             variant="ghost"
             onClick={() => handleOpenChange(false)}
             disabled={isSubmitting}
-            className="text-white/70 hover:text-white hover:bg-white/10 border border-white/20"
+            className="text-stone-600 hover:text-stone-900 hover:bg-stone-100 border border-stone-300"
             data-ocid="admin.project.cancel_button"
           >
             Cancel
@@ -461,7 +461,7 @@ function ProjectFormDialog({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-white text-stone-950 hover:bg-stone-100 font-semibold"
+            className="bg-stone-900 text-white hover:bg-stone-800 font-semibold"
             data-ocid="admin.project.submit_button"
           >
             {isSubmitting ? (

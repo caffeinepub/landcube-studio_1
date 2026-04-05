@@ -8,7 +8,6 @@ import {
 import { Loader2, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
-import { useIsAdmin } from "../hooks/useQueries";
 
 const navLinks = [
   { label: "HOME", href: "#home" },
@@ -31,8 +30,6 @@ export function Navigation({ onAdminDashboard }: NavigationProps) {
     useInternetIdentity();
   const isAuthenticated = !!identity;
   const isLoggingIn = loginStatus === "logging-in";
-
-  const { data: isAdmin } = useIsAdmin();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -114,7 +111,7 @@ export function Navigation({ onAdminDashboard }: NavigationProps) {
                 Admin
               </button>
             )}
-            {isAuthenticated && isAdmin && (
+            {isAuthenticated && (
               <button
                 type="button"
                 onClick={onAdminDashboard}
@@ -173,7 +170,7 @@ export function Navigation({ onAdminDashboard }: NavigationProps) {
                 Admin Login
               </button>
             )}
-            {isAuthenticated && isAdmin && (
+            {isAuthenticated && (
               <button
                 type="button"
                 onClick={() => {
